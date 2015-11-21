@@ -1,0 +1,34 @@
+{
+  "name": "node-red-loose",
+  "version": "0.0.1",
+  "description": "Node Red Slack client",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "node",
+    "red",
+    "slack",
+    "node-red"
+  ],
+  "node-red": {
+    "nodes": {
+      "loose": "loose.js"
+    }
+  },
+  "author": "Stuart Grimshaw <stuart.grimshaw@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "slack-client": "^1.4.1"
+  },
+  "devDependencies": {
+    "grunt": "0.4.5",
+    "grunt-cli": "0.1.13",
+    "grunt-contrib-jshint": "0.11.3",
+    "grunt-simple-mocha": "^0.4.0",
+    "mocha": "2.3.3",
+    "should": "6.0.3",
+    "sinon": "1.17.1"
+  }
+}
