@@ -1,0 +1,37 @@
+<script type="text/javascript">
+    RED.nodes.registerType('slack-send',{
+        category: 'social',
+        color: '#a6bbcf',
+        defaults: {
+            name: {type:"text", value:""},
+            channel: {type: "text"},
+            slack: {type: "slack-credentials", required: true}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "arrow-out.png",
+        label: function() {
+            return this.name||"slack-send";
+        },
+        align: 'right'
+    });
+</script>
+
+<script type="text/x-red" data-template-name="e-mail">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-folder"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Slack Send" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-token"><i class="fa fa-folder"></i> Token</label>
+        <input type="text" id="node-input-name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-folder"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Slack Send">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="lower-case">
+    <p>Send the contents of msg.payload to the slack channel defined in the corresponding slack-config node.</p>
+</script>
