@@ -1,21 +1,27 @@
+var proxyquire = require("proxyquire");
+
 var sinon = require('sinon');
 var assert = require('assert');
-var proxyquire = require('proxyquire');
+var rewire = require('rewire');
 
 var helper = require('../helper.js');
 
-var currentSlack;
-var SlackStub = {
-    connect: sinon.spy(),
-    disconnect: sinon.spy()
-};
+var SlackSend = require('../../slack/81_slack_send');
+var SlackCredentials = rewire('../../slack/80_slack_credentials');
 
-var SlackSend = proxyquire('../../slack/81_slack_send',{
-
-});
+var Slack = require('slack-client');
 
 describe('SlackBot Out Node', function () {
+    var connectReset, mockCLient, mockClientWrapper;
+
     beforeEach(function(done) {
+        mockCLient = sinon.createStubInstance(Slack);
+
+        mockClientWrapper = {
+            connect: sinon.stub().returns(mockCLient)
+        };
+
+        connectReset = SlackCredentials.__set__('SlackClient', mockClientWrapper);
 
         helper.startServer(done);
     });
@@ -23,6 +29,8 @@ describe('SlackBot Out Node', function () {
     afterEach(function(done) {
         helper.unload();
         helper.stopServer(done);
+
+        connectReset();
     });
 
     it('should load', function (done) {
@@ -52,18 +60,21 @@ describe('SlackBot Out Node', function () {
         }));
     });
 
-    it.only('should connect when credentials are available', function (done) {
+    it('should connect when credentials are available', function (done) {
         // Create a mock Slack credentials node.
-        var flow = [{id: 'n1', type: 'slack-credentials', token: 'token1', node_name: 'Slack Credentials Node'},
-            {id: 'n2', type: 'slack-send', name: 'Slack Send Node', slack: 'n1'}];
+        var flow = [
+            {id: 'n1', type: 'slack-credentials', token: 'token1', node_name: 'Slack Credentials Node', reconnect: true, mark: true},
+            {id: 'n2', type: 'slack-send', name: 'Slack Send Node', slack: 'n1'}
+        ];
 
-        helper.load(SlackSend, flow, function () {
+        helper.load([SlackSend, SlackCredentials], flow, function () {});
+
+        setTimeout(function () {
             try {
-                var logEvents = helper.log().args.filter(function (evt) {
-                    return evt[0].type == 'slack-send';
-                });
+                assert(mockClientWrapper.connect.calledOnce);
+                assert(mockCLient.on.calledOnce);
 
-                // Check that 'connect()' has been called.
+                // Need to set up the right mock for what 'SlackClient.connect' returns
 
                 done();
             } catch (e) { done(e) }

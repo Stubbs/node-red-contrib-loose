@@ -19,39 +19,38 @@ module.exports = function(grunt) {
 
     // Project configuration.
     grunt.initConfig({
-            pkg: grunt.file.readJSON('package.json'),
-            simplemocha: {
-                options: {
-                    globals: ['expect'],
-                    timeout: 3000,
-                    ignoreLeaks: false,
-                    ui: 'bdd',
-                    reporter: 'spec'
-                },
-                cli: { src: ["test/**/*_spec.js"] }
+        pkg: grunt.file.readJSON('package.json'),
+        simplemocha: {
+            options: {
+                globals: ['expect'],
+                timeout: 3000,
+                ignoreLeaks: false,
+                ui: 'bdd',
+                reporter: 'spec'
             },
-            jshint: {
-                options: {
-                    // http://www.jshint.com/docs/options/
-                    "curly": true,    // require braces
-                    "eqnull": true,   // ignore ==null
-                    "forin": true,    // require property filtering in "for in" loops
-                    "immed": true,    // require immediate functions to be wrapped in ( )
-                    "nonbsp": true,   // warn on unexpected whitespace breaking chars
-                    // "strict": true, // commented out for now as it causes 100s of warnings, but want to get there eventually
-                    "loopfunc": true, // allow functions to be defined in loops
-                    "sub": true       // don't warn that foo['bar'] should be written as foo.bar
-                },
-                cli: [
-                    'loose.js',
-                    'lib/**/*.js',
-                ]
-            }
+            cli: { src: ["test/**/*_spec.js"] }
+        },
+        jshint: {
+            options: {
+                // http://www.jshint.com/docs/options/
+                "curly": true,    // require braces
+                "eqnull": true,   // ignore ==null
+                "forin": true,    // require property filtering in "for in" loops
+                "immed": true,    // require immediate functions to be wrapped in ( )
+                "nonbsp": true,   // warn on unexpected whitespace breaking chars
+                // "strict": true, // commented out for now as it causes 100s of warnings, but want to get there eventually
+                "loopfunc": true, // allow functions to be defined in loops
+                "sub": true       // don't warn that foo['bar'] should be written as foo.bar
+            },
+            cli: [
+                'loose.js',
+                'lib/**/*.js',
+            ]
+        }
     });
 
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
     grunt.registerTask('default', ['jshint:cli','simplemocha:cli']);
-
 };

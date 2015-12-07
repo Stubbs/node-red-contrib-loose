@@ -5,7 +5,7 @@ module.exports = function(RED) {
         this.slack = RED.nodes.getNode(n.slack);
 
         if(this.slack) {
-            this.slack.connect();
+            this.slack.slackConnect();
         } else {
             this.error(RED._("errors.missing-config"));
         }
