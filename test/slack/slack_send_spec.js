@@ -12,13 +12,14 @@ var SlackCredentials = rewire('../../slack/80_slack_credentials');
 var Slack = require('slack-client');
 
 describe('SlackBot Out Node', function () {
-    var connectReset, mockCLient, mockClientWrapper;
+    var connectReset, mockClient, mockClientWrapper;
+    var mockCredentials = {n1: {token: 'token1'}};
 
     beforeEach(function(done) {
-        mockCLient = sinon.createStubInstance(Slack);
+        mockClient = sinon.createStubInstance(Slack);
 
         mockClientWrapper = {
-            connect: sinon.stub().returns(mockCLient)
+            connect: sinon.stub().returns(mockClient)
         };
 
         connectReset = SlackCredentials.__set__('SlackClient', mockClientWrapper);
@@ -34,8 +35,8 @@ describe('SlackBot Out Node', function () {
     });
 
     it('should load', function (done) {
-        var flow = [{id: 'n1', type: 'slack-send'}];
-        helper.load(SlackSend, flow, function () {
+        var flow = [{id: 'n1', type: 'slack-send', slack: 'slack-credentials'}, {id: 'slack-credentials', type: 'slack-credentials', node_name: 'Slack Credentials Node', reconnect: true, mark: true},];
+        helper.load(SlackSend, flow, mockCredentials, function () {
             // Do nothing.
             done();
         });
@@ -60,25 +61,89 @@ describe('SlackBot Out Node', function () {
         }));
     });
 
-    it('should connect when credentials are available', function (done) {
+    it('should connect and login when credentials are available', function () {
         // Create a mock Slack credentials node.
         var flow = [
-            {id: 'n1', type: 'slack-credentials', token: 'token1', node_name: 'Slack Credentials Node', reconnect: true, mark: true},
+            {id: 'n1', type: 'slack-credentials', node_name: 'Slack Credentials Node', reconnect: true, mark: true},
             {id: 'n2', type: 'slack-send', name: 'Slack Send Node', slack: 'n1'}
         ];
 
-        helper.load([SlackSend, SlackCredentials], flow, function () {});
+        helper.load([SlackSend, SlackCredentials], flow, mockCredentials, function () {});
 
         setTimeout(function () {
-            try {
-                assert(mockClientWrapper.connect.calledOnce);
-                assert(mockCLient.on.calledOnce);
-
-                // Need to set up the right mock for what 'SlackClient.connect' returns
-
-                done();
-            } catch (e) { done(e) }
+            assert(mockClientWrapper.connect.calledOnce);
+            assert(mockClientWrapper.connect.calledWith('token1', true, true));
+            assert(mockClient.login.calledOnce);
+            assert(mockClient.on.calledTwice);
         });
     });
 
+    it('should display an error message when no slack channel is provided.', function () {
+        var flow = [
+            {id: 'n1', type: 'slack-credentials', node_name: 'Slack Credentials Node', reconnect: true, mark: true},
+            {id: 'n2', type: 'slack-send', name: 'Slack Send Node', slack: 'n1'},
+            {id: 'n3', type: 'helper', wires:[["n2"]]}
+        ];
+
+        helper.load([SlackSend, SlackCredentials], flow, mockCredentials, function () {
+            helper.getNode('n3').send({payload: 'Hello world'});
+        });
+
+        setTimeout(function () {
+            var logEvents = helper.log().args.filter(function (evt) {
+                return evt[0].type == 'slack-send';
+            });
+
+            logEvents[1][0].should.have.a.property('msg');
+            logEvents[1][0].msg.toString().should.startWith('errors.no-slack-channel');
+        });
+    });
+
+    it('should display an error if the channel cannot be found.', function () {
+        var flow = [
+            {id: 'n1', type: 'slack-credentials', node_name: 'Slack Credentials Node', reconnect: true, mark: true},
+            {id: 'n2', type: 'slack-send', name: 'Slack Send Node', slack: 'n1', channel: 'test'},
+            {id: 'n3', type: 'helper', wires:[["n2"]]}
+        ];
+
+        mockClient.getChannelGroupOrDMByID.returns(undefined);
+
+        helper.load([SlackSend, SlackCredentials], flow, mockCredentials, function (done) {
+            helper.getNode('n3').send({payload: 'Hello world'});
+        });
+
+        setTimeout(function () {
+            var logEvents = helper.log().args.filter(function (evt) {
+                return evt[0].type == 'slack-send';
+            });
+
+            logEvents[1][0].should.have.a.property('msg');
+            logEvents[1][0].msg.toString().should.startWith('errors.slack-channel-doesnt-exist');
+
+            mockClient.getChannelGroupOrDMByID.reset();
+        });
+    });
+
+    it('should send a message to the channel in the node config if not overriden in the message.', function () {
+        var flow = [
+            {id: 'n1', type: 'slack-credentials', node_name: 'Slack Credentials Node', reconnect: true, mark: true},
+            {id: 'n2', type: 'slack-send', name: 'Slack Send Node', slack: 'n1', channel: 'test'},
+            {id: 'n3', type: 'helper', wires:[["n2"]]}
+        ];
+
+        helper.load([SlackSend, SlackCredentials], flow, mockCredentials, function () {
+            var mockChannel = {send: sinon.spy()};
+
+            mockClient.getChannelGroupOrDMByID.returns(mockChannel);
+
+            helper.getNode('n3').send({payload: 'Hello world'});
+
+            assert(mockClient.getChannelGroupOrDMByID.calledOnce);
+            assert(mockClient.getChannelGroupOrDMByID.calledWith('test'));
+
+            assert(mockChannel.send.calledOnce);
+
+            mockClient.getChannelGroupOrDMByID.reset();
+        });
+    });
 });
