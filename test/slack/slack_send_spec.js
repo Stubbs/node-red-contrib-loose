@@ -161,6 +161,13 @@ describe('SlackBot Out Node', function () {
 
             helper.getNode('n3').send({payload: 'Hello world'});
 
+            var logEvents = helper.log().args.filter(function (evt) {
+                return evt[0].type == 'slack-send';
+            });
+
+            logEvents[1][0].should.have.a.property('msg');
+            logEvents[1][0].msg.toString().should.startWith('errors.slack-unable-to-send');
+
             assert(mockChannel.send.calledOnce);
             assert(mockClient.login.calledTwice);
 
