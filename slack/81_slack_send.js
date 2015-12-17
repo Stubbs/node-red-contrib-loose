@@ -23,7 +23,10 @@ module.exports = function(RED) {
                     var slackChannel = slack.slackClient.getChannelGroupOrDMByName(chan);
 
                     if(slackChannel) {
-                        slackChannel.send(message.payload);
+                        if(!slackChannel.send(message.payload)) {
+                            node.error("errors.slack-unable-to-send");
+                            slack.slackClient.login();
+                        }
                     } else {
                         node.error(RED._("errors.slack-channel-doesnt-exist"));
                     }

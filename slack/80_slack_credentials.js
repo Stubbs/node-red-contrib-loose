@@ -36,14 +36,6 @@ module.exports = function(RED) {
 
             return this.slackClient;
         };
-
-        this.send = function (message) {
-            if(!node.slackClient) {
-                node.log('Easy tiger! Slack isn\'t connected yet!');
-            }
-
-
-        };
     }
 
     RED.nodes.registerType("slack-credentials",SlackCredentialsNode, { credentials: {token: {type: "text"}}});

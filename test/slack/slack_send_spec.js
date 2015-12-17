@@ -134,16 +134,38 @@ describe('SlackBot Out Node', function () {
         helper.load([SlackSend, SlackCredentials], flow, mockCredentials, function () {
             var mockChannel = {send: sinon.spy()};
 
-            mockClient.getChannelGroupOrDMByID.returns(mockChannel);
+            mockClient.getChannelGroupOrDMByName.returns(mockChannel);
 
             helper.getNode('n3').send({payload: 'Hello world'});
 
-            assert(mockClient.getChannelGroupOrDMByID.calledOnce);
-            assert(mockClient.getChannelGroupOrDMByID.calledWith('test'));
+            assert(mockClient.getChannelGroupOrDMByName.calledOnce);
+            assert(mockClient.getChannelGroupOrDMByName.calledWith('test'));
 
             assert(mockChannel.send.calledOnce);
 
             mockClient.getChannelGroupOrDMByID.reset();
+        });
+    });
+
+    it('should attempt to log in again if sending fails.', function () {
+        var flow = [
+            {id: 'n1', type: 'slack-credentials', node_name: 'Slack Credentials Node', reconnect: true, mark: true},
+            {id: 'n2', type: 'slack-send', name: 'Slack Send Node', slack: 'n1', channel: 'test'},
+            {id: 'n3', type: 'helper', wires:[["n2"]]}
+        ];
+
+        helper.load([SlackSend, SlackCredentials], flow, mockCredentials, function () {
+            var mockChannel = {send: sinon.stub().returns(false)};
+
+            mockClient.getChannelGroupOrDMByName.returns(mockChannel);
+
+            helper.getNode('n3').send({payload: 'Hello world'});
+
+            assert(mockChannel.send.calledOnce);
+            assert(mockClient.login.calledTwice);
+
+            mockClient.getChannelGroupOrDMByName.reset();
+            mockClient.login.reset();
         });
     });
 });
