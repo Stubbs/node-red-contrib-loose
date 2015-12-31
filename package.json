@@ -2,7 +2,6 @@
   "name": "node-red-contrib-loose",
   "version": "0.0.1",
   "description": "Node Red Slack client",
-  "main": "index.js",
   "scripts": {
     "test": "grunt simplemocha:cli"
   },
@@ -15,7 +14,8 @@
   "node-red": {
     "nodes": {
       "slack-credentials": "slack/80_slack_credentials.js",
-      "slack-send": "slack/81_slack_send.js"
+      "slack-send": "slack/81_slack_send.js",
+      "slack-listen": "slack/82_slack_listen.js"
     }
   },
   "author": "Stuart Grimshaw <stuart.grimshaw@gmail.com>",

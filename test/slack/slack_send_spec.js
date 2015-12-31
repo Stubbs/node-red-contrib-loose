@@ -1,5 +1,3 @@
-var proxyquire = require("proxyquire");
-
 var sinon = require('sinon');
 var assert = require('assert');
 var rewire = require('rewire');

@@ -25,6 +25,9 @@ module.exports = function(RED) {
                     if(slackChannel) {
                         if(!slackChannel.send(message.payload)) {
                             node.error("errors.slack-unable-to-send");
+
+                            // @TODO Resend the message somehow.
+
                             slack.slackClient.login();
                         }
                     } else {
