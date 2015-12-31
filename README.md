@@ -1,4 +1,4 @@
-#Freeboard Dashboard for Node-RED
+#Slack Client for Node-RED
 
 [![Build Status](https://travis-ci.org/Stubbs/node-red-loose.svg?branch=master)](https://travis-ci.org/Stubbs/node-red-loose)
 
