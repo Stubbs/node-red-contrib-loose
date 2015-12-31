@@ -1,7 +1,8 @@
 {
   "name": "node-red-contrib-loose",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Node Red Slack client",
+  "repository": "https://github.com/Stubbs/node-red-contrib-loose",
   "scripts": {
     "test": "grunt simplemocha:cli"
   },
