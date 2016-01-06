@@ -1,6 +1,6 @@
 #Slack Client for Node-RED
 
-[![Build Status](https://travis-ci.org/Stubbs/node-red-loose.svg?branch=master)](https://travis-ci.org/Stubbs/node-red-loose)
+[![Build Status](https://travis-ci.org/Stubbs/node-red-contrib-loose.svg?branch=master)](https://travis-ci.org/Stubbs/node-red-contrib-loose)
 
 #Installation
 Just install this plugin to your Node Red installation by using npm: `npm install node-red-contrib-loose` in your Node Red root directory
