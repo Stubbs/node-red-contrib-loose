@@ -16,7 +16,7 @@ module.exports = function(RED) {
 
             this.slack.slackClient.on('message', function(message) {
                 var msg = {
-                    payload: message.txt
+                    payload: message.text //Changed txt to text. Possibly a change to the Slack API that hadn't filtered through
                 };
 
                 var slackChannel = slack.slackClient.getChannelGroupOrDMByID(message.channel);
